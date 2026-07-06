@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-agent-config
+  namespace: ai-agent
+data:
+  TARGET_NAMESPACE: "gitlab"
+  TARGET_DEPLOYMENT: "gitlab"
+  TARGET_CONTAINER: "gitlab"
+  CHROMA_HOST: "chromadb.chromadb.svc.cluster.local"
+  CHROMA_PORT: "8000"
+  CHROMA_COLLECTION: "gitlab-incidents"
+  ANTHROPIC_MODEL: "claude-sonnet-5"
+  LOG_TAIL_LINES: "200"
+  # Сколько секунд агент ждёт команду "ok" в Telegram, прежде чем просто оставить инцидент открытым
+  CONFIRMATION_TTL_SECONDS: "1800"

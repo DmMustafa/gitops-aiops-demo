@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: monitoring-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: "62.7.0"
+    helm:
+      releaseName: monitoring
+      valuesObject:
+        # Урезаем ресурсы под minikube
+        prometheus:
+          prometheusSpec:
+            resources:
+              requests: { cpu: 200m, memory: 512Mi }
+              limits: { cpu: 500m, memory: 1Gi}
+            retention: 6h
+            # Позволяем находить PrometheusRule/ServiceMonitor в любом namespace (в т.ч. gitlab)
+            ruleSelectorNilUsesHelmValues: false
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMonitorSelectorNilUsesHelmValues: false
+
+        alertmanager:
+          alertmanagerSpec:
+            resources:
+              requests: { cpu: 50m, memory: 128Mi }
+              limits: { cpu: 200m, memory: 256Mi }
+          config:
+            global:
+              resolve_timeout: 5m
+            route:
+              receiver: "ai-agent-webhook"
+              group_by: ["namespace", "alertname"]
+              group_wait: 10s
+              group_interval: 30s
+              repeat_interval: 15m
+              routes:
+                - matchers:
+                    - namespace = "gitlab"
+                  receiver: "ai-agent-webhook"
+                  continue: false
+            receivers:
+              - name: "ai-agent-webhook"
+                webhook_configs:
+                  - url: "http://ai-agent.ai-agent.svc.cluster.local:8080/alert"
+                    send_resolved: true
+
+        grafana:
+          enabled: true
+          adminPassword: admin
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 200m, memory: 256Mi }
+
+        kubeStateMetrics:
+          enabled: true
+        nodeExporter:
+          enabled: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

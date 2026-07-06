@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab
+  namespace: gitlab
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gitlab
+  template:
+    metadata:
+      labels:
+        app: gitlab
+    spec:
+      containers:
+        - name: gitlab
+          image: gitlab/gitlab-ce:17.1.1-ce.0
+          ports:
+            - name: http
+              containerPort: 80
+            - name: ssh
+              containerPort: 22
+          env:
+            - name: GITLAB_OMNIBUS_CONFIG
+              value: |
+                external_url 'http://gitlab.local'
+                # Урезаем ресурсы под minikube
+                puma['worker_processes'] = 2
+                puma['per_worker_max_memory_mb'] = 850
+                sidekiq['max_concurrency'] = 10
+                postgresql['shared_buffers'] = "256MB"
+                prometheus_monitoring['enable'] = false
+                grafana['enable'] = false
+                gitlab_rails['gitlab_shell_ssh_port'] = 22
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          readinessProbe:
+            httpGet:
+              path: /-/readiness
+              port: 80
+            initialDelaySeconds: 180
+            periodSeconds: 15
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /-/liveness
+              port: 80
+            initialDelaySeconds: 240
+            periodSeconds: 20
+            failureThreshold: 6
+          volumeMounts:
+            - name: gitlab-data
+              mountPath: /etc/gitlab
+              subPath: config
+            - name: gitlab-data
+              mountPath: /var/log/gitlab
+              subPath: logs
+            - name: gitlab-data
+              mountPath: /var/opt/gitlab
+              subPath: data
+      volumes:
+        - name: gitlab-data
+          persistentVolumeClaim:
+            claimName: gitlab-data

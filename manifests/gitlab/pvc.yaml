@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gitlab-data
+  namespace: gitlab
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # storageClassName не указан — minikube по умолчанию использует
+  # provisioner "standard" (hostpath), этого достаточно для демо.
+  resources:
+    requests:
+      storage: 8Gi

@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  # ВАЖНО: замени repoURL на реальный адрес твоего git-репозитория,
+  # в который ты запушишь содержимое этой папки (gitops-aiops-demo/).
+  source:
+    repoURL: https://github.com/<your-user>/gitops-aiops-demo.git
+    targetRevision: HEAD
+    path: argocd/apps
+    directory:
+      recurse: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

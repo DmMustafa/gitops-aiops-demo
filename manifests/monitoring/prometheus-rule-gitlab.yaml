@@ -1,0 +1,51 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gitlab-demo-alerts
+  namespace: monitoring
+  labels:
+    # лейбл, по которому kube-prometheus-stack по умолчанию находит правила
+    release: monitoring
+spec:
+  groups:
+    - name: gitlab-demo-alerts
+      rules:
+        - alert: GitLabDeploymentReplicasUnavailable
+          expr: kube_deployment_status_replicas_unavailable{namespace="gitlab"} > 0
+          for: 1m
+          labels:
+            severity: critical
+            namespace: gitlab
+          annotations:
+            summary: "GitLab deployment {{ $labels.deployment }} has unavailable replicas"
+            description: "У деплоймента {{ $labels.deployment }} в namespace gitlab есть недоступные реплики уже больше минуты."
+
+        - alert: GitLabPodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace="gitlab"}[10m]) > 0
+          for: 0m
+          labels:
+            severity: critical
+            namespace: gitlab
+          annotations:
+            summary: "GitLab pod {{ $labels.pod }} перезапускается (CrashLoop)"
+            description: "Контейнер {{ $labels.container }} в поде {{ $labels.pod }} перезапускался за последние 10 минут."
+
+        - alert: GitLabPodNotReady
+          expr: kube_pod_status_ready{namespace="gitlab", condition="false"} == 1
+          for: 2m
+          labels:
+            severity: warning
+            namespace: gitlab
+          annotations:
+            summary: "GitLab pod {{ $labels.pod }} не готов"
+            description: "Под {{ $labels.pod }} в namespace gitlab не в состоянии Ready более 2 минут."
+
+        - alert: GitLabPodDown
+          expr: kube_pod_status_phase{namespace="gitlab", phase=~"Failed|Unknown"} == 1
+          for: 1m
+          labels:
+            severity: critical
+            namespace: gitlab
+          annotations:
+            summary: "GitLab pod {{ $labels.pod }} в фазе {{ $labels.phase }}"
+            description: "Под {{ $labels.pod }} в namespace gitlab находится в аварийной фазе."

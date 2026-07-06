@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: chromadb-seed
+  namespace: ai-agent
+  annotations:
+    # чтобы ArgoCD не пытался пересоздавать уже отработавший Job при каждой синхронизации
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: ai-agent:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "seed_data.py"]
+          envFrom:
+            - configMapRef:
+                name: ai-agent-config
+            - secretRef:
+                name: ai-agent-secrets
