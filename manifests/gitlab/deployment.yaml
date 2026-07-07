@@ -34,7 +34,6 @@ spec:
                 sidekiq['max_concurrency'] = 10
                 postgresql['shared_buffers'] = "256MB"
                 prometheus_monitoring['enable'] = false
-                grafana['enable'] = false
                 gitlab_rails['gitlab_shell_ssh_port'] = 22
           resources:
             requests:
