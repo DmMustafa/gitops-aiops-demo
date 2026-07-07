@@ -11,7 +11,7 @@ spec:
   # ВАЖНО: замени repoURL на реальный адрес твоего git-репозитория,
   # в который ты запушишь содержимое этой папки (gitops-aiops-demo/).
   source:
-    repoURL: https://github.com/<your-user>/gitops-aiops-demo.git
+    repoURL: https://github.com/DmMustafa/gitops-aiops-demo.git
     targetRevision: HEAD
     path: argocd/apps
     directory:

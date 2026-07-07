@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/<your-user>/gitops-aiops-demo.git
+    repoURL: https://github.com/DmMustafa/gitops-aiops-demo.git
     targetRevision: HEAD
     path: manifests/monitoring
   destination:
