@@ -35,6 +35,10 @@ spec:
                 postgresql['shared_buffers'] = "256MB"
                 prometheus_monitoring['enable'] = false
                 gitlab_rails['gitlab_shell_ssh_port'] = 22
+                # kube-probe стучится не с loopback, а с адреса пода/узла -
+                # без этого /-/readiness и /-/liveness отдают 404 и kubelet
+                # считает контейнер мёртвым (см. SIGTERM в логах после провала liveness).
+                gitlab_rails['monitoring_whitelist'] = ['0.0.0.0/0']
           resources:
             requests:
               cpu: "1"
