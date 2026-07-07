@@ -31,7 +31,7 @@ spec:
                 external_url 'http://gitlab.local'
                 puma['worker_processes'] = 2
                 puma['per_worker_max_memory_mb'] = 850
-                sidekiq['max_concurrency'] = 10
+                sidekiq['concurrency'] = 10
                 postgresql['shared_buffers'] = "256MB"
                 prometheus_monitoring['enable'] = false
                 gitlab_rails['gitlab_shell_ssh_port'] = 22
