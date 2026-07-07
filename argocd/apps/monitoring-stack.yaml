@@ -31,7 +31,11 @@ spec:
             global:
               resolve_timeout: 5m
             route:
-              receiver: "hermes-agent-webhook"
+              # ВАЖНО: root/default receiver - "пустышка" без webhook, иначе сюда
+              # попадают ВСЕ алерты кластера (etcd, node-exporter и т.п.), а не
+              # только GitLab. На агента алерты роутятся исключительно через
+              # дочерний route ниже, по matcher'у namespace="gitlab".
+              receiver: "null"
               group_by: ["namespace", "alertname"]
               group_wait: 10s
               group_interval: 30s
@@ -42,6 +46,7 @@ spec:
                   receiver: "hermes-agent-webhook"
                   continue: false
             receivers:
+              - name: "null"
               - name: "hermes-agent-webhook"
                 webhook_configs:
                   - url: "http://hermes-agent.hermes-agent.svc.cluster.local:8080/alert"
