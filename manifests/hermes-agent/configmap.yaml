@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-agent-config
+  namespace: hermes-agent
+data:
+  TARGET_NAMESPACE: "gitlab"
+  TARGET_DEPLOYMENT: "gitlab"
+  TARGET_CONTAINER: "gitlab"
+
+  CHROMA_HOST: "chromadb.chromadb.svc.cluster.local"
+  CHROMA_PORT: "8000"
+  CHROMA_COLLECTION: "gitlab-incidents"
+
+  OLLAMA_HOST: "http://ollama.ollama.svc.cluster.local:11434"
+  OLLAMA_MODEL: "hermes3"
+
+  MATTERMOST_URL: "http://mattermost.chat.svc.cluster.local:8065"
+  # Внутренний адрес самого агента - нужен, чтобы Mattermost мог стучаться
+  # на /mm_action при нажатии кнопок в сообщении.
+  AGENT_SELF_URL: "http://hermes-agent.hermes-agent.svc.cluster.local:8080"
+
+  LOG_TAIL_LINES: "200"

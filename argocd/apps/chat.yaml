@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ai-agent
+  name: chat
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/<your-user>/gitops-aiops-demo.git
     targetRevision: HEAD
-    path: manifests/ai-agent
+    path: manifests/chat
   destination:
     server: https://kubernetes.default.svc
-    namespace: ai-agent
+    namespace: chat
   syncPolicy:
     automated:
       prune: true

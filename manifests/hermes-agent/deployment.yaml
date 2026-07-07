@@ -1,34 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ai-agent
-  namespace: ai-agent
+  name: hermes-agent
+  namespace: hermes-agent
   labels:
-    app: ai-agent
+    app: hermes-agent
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ai-agent
+      app: hermes-agent
   template:
     metadata:
       labels:
-        app: ai-agent
+        app: hermes-agent
     spec:
-      serviceAccountName: ai-agent
+      serviceAccountName: hermes-agent
       containers:
-        - name: ai-agent
-          # Собери и запушь образ из ai-agent-src/ в свой registry (или загрузи в minikube: `minikube image load ai-agent:latest`)
-          image: ai-agent:latest
+        - name: hermes-agent
+          # Собери образ из hermes-agent-src/ и загрузи в minikube:
+          #   docker build -t hermes-agent:latest hermes-agent-src/
+          #   minikube image load hermes-agent:latest
+          image: hermes-agent:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
           envFrom:
             - configMapRef:
-                name: ai-agent-config
+                name: hermes-agent-config
             - secretRef:
-                name: ai-agent-secrets
+                name: hermes-agent-secrets
           resources:
             requests:
               cpu: "100m"

@@ -4,7 +4,6 @@ metadata:
   name: gitlab-demo-alerts
   namespace: monitoring
   labels:
-    # лейбл, по которому kube-prometheus-stack по умолчанию находит правила
     release: monitoring
 spec:
   groups:

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mattermost
+  namespace: chat
+  labels:
+    app: mattermost
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mattermost
+  template:
+    metadata:
+      labels:
+        app: mattermost
+    spec:
+      containers:
+        - name: mattermost
+          image: mattermost/mattermost-team-edition:9.11
+          ports:
+            - name: http
+              containerPort: 8065
+          env:
+            - name: MM_SQLSETTINGS_DRIVERNAME
+              value: "postgres"
+            - name: MM_SQLSETTINGS_DATASOURCE
+              value: "postgres://mmuser:mmpass@postgres.chat.svc.cluster.local:5432/mattermost?sslmode=disable&connect_timeout=10"
+            # Поменяй на реальный адрес, под которым будешь открывать Mattermost
+            # (port-forward localhost:8065 для демо, либо Ingress/NodePort).
+            - name: MM_SERVICESETTINGS_SITEURL
+              value: "http://localhost:8065"
+            - name: MM_SERVICESETTINGS_ENABLELOCALMODE
+              value: "true"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /api/v4/system/ping
+              port: 8065
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          volumeMounts:
+            - name: mattermost-data
+              mountPath: /mattermost/data
+              subPath: data
+            - name: mattermost-data
+              mountPath: /mattermost/logs
+              subPath: logs
+            - name: mattermost-data
+              mountPath: /mattermost/config
+              subPath: config
+            - name: mattermost-data
+              mountPath: /mattermost/plugins
+              subPath: plugins
+      volumes:
+        - name: mattermost-data
+          persistentVolumeClaim:
+            claimName: mattermost-data

@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-pull-hermes
+  namespace: ollama
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  # Скачивание модели (~4-5GB) может занять продолжительное время на первом запуске
+  activeDeadlineSeconds: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: pull
+          image: curlimages/curl:8.9.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Ждём, пока Ollama поднимется..."
+              until curl -sf http://ollama.ollama.svc.cluster.local:11434/ > /dev/null; do
+                sleep 5
+              done
+              echo "Тянем модель hermes3 (Nous Research Hermes 3)..."
+              curl -sf http://ollama.ollama.svc.cluster.local:11434/api/pull \
+                -d '{"name": "hermes3", "stream": false}'
+              echo "Готово."

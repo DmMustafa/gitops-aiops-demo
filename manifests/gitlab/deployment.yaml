@@ -29,7 +29,6 @@ spec:
             - name: GITLAB_OMNIBUS_CONFIG
               value: |
                 external_url 'http://gitlab.local'
-                # Урезаем ресурсы под minikube
                 puma['worker_processes'] = 2
                 puma['per_worker_max_memory_mb'] = 850
                 sidekiq['max_concurrency'] = 10

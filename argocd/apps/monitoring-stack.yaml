@@ -12,14 +12,12 @@ spec:
     helm:
       releaseName: monitoring
       valuesObject:
-        # Урезаем ресурсы под minikube
         prometheus:
           prometheusSpec:
             resources:
               requests: { cpu: 200m, memory: 512Mi }
-              limits: { cpu: 500m, memory: 1Gi}
+              limits: { cpu: 500m, memory: 1Gi }
             retention: 6h
-            # Позволяем находить PrometheusRule/ServiceMonitor в любом namespace (в т.ч. gitlab)
             ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             podMonitorSelectorNilUsesHelmValues: false
@@ -33,7 +31,7 @@ spec:
             global:
               resolve_timeout: 5m
             route:
-              receiver: "ai-agent-webhook"
+              receiver: "hermes-agent-webhook"
               group_by: ["namespace", "alertname"]
               group_wait: 10s
               group_interval: 30s
@@ -41,12 +39,12 @@ spec:
               routes:
                 - matchers:
                     - namespace = "gitlab"
-                  receiver: "ai-agent-webhook"
+                  receiver: "hermes-agent-webhook"
                   continue: false
             receivers:
-              - name: "ai-agent-webhook"
+              - name: "hermes-agent-webhook"
                 webhook_configs:
-                  - url: "http://ai-agent.ai-agent.svc.cluster.local:8080/alert"
+                  - url: "http://hermes-agent.hermes-agent.svc.cluster.local:8080/alert"
                     send_resolved: true
 
         grafana:

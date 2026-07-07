@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ollama
+  labels:
+    app: ollama
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - name: http
+              containerPort: 11434
+          env:
+            - name: OLLAMA_KEEP_ALIVE
+              value: "24h"    # не выгружать модель из памяти между запросами
+          resources:
+            # Hermes 3 8B (Q4) на CPU - тяжело, но воспроизводимо в демо-режиме.
+            # Если есть GPU в minikube (--driver=docker --gpus=all), лучше добавить
+            # nvidia.com/gpu в limits.
+            requests:
+              cpu: "2"
+              memory: "6Gi"
+            limits:
+              cpu: "4"
+              memory: "10Gi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 11434
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+      volumes:
+        - name: ollama-data
+          persistentVolumeClaim:
+            claimName: ollama-data
