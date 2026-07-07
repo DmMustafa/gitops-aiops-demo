@@ -48,13 +48,20 @@ spec:
               memory: "4Gi"
           readinessProbe:
             httpGet:
-              path: /-/readiness
+              # Без ?all=1 GitLab проверяет только то, что процесс жив, и НЕ смотрит
+              # на postgresql/redis/gitaly - поэтому под оставался Ready даже когда
+              # внутренние сервисы были потушены. С ?all=1 readiness реально дергает
+              # db_check/redis_check и т.д. и отдаёт 503, если что-то из них недоступно.
+              path: /-/readiness?all=1
               port: 80
             initialDelaySeconds: 180
             periodSeconds: 15
             failureThreshold: 6
           livenessProbe:
             httpGet:
+              # Liveness намеренно БЕЗ all=1 - это осознанная рекомендация GitLab/K8s:
+              # если сюда тоже добавить all=1, кратковременная просадка postgres/redis
+              # будет убивать (restart) сам процесс, а не просто выводить под из Ready.
               path: /-/liveness
               port: 80
             initialDelaySeconds: 240
