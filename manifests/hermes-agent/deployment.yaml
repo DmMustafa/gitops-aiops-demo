@@ -21,7 +21,7 @@ spec:
           # Собери образ из hermes-agent-src/ и загрузи в minikube:
           #   docker build -t hermes-agent:latest hermes-agent-src/
           #   minikube image load hermes-agent:latest
-          image: hermes-agent:latest
+          image: hermes-agent:1
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
