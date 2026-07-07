@@ -13,7 +13,7 @@ data:
   CHROMA_COLLECTION: "gitlab-incidents"
 
   OLLAMA_HOST: "http://ollama.ollama.svc.cluster.local:11434"
-  OLLAMA_MODEL: "qwen3.5:9b"
+  OLLAMA_MODEL: "hermes3"
 
   MATTERMOST_URL: "http://mattermost.chat.svc.cluster.local:8065"
   # Внутренний адрес самого агента - нужен, чтобы Mattermost мог стучаться
